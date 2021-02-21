@@ -5,8 +5,21 @@ library(maps)
 
 incarceration_trends <- read.csv("c:\\Users\\tommy\\project\\incarceration-trends\\incarceration_trends.csv")
 
-
-
+white_and_poc <- incarceration_trends %>%
+  filter(year >= 2000) %>%
+  group_by(year) %>%
+  summarize(total_white_jail_pop = sum(white_jail_pop, na.rm=TRUE),
+            total_aapi_jail_pop = sum(aapi_jail_pop, na.rm=TRUE),
+            total_black_jail_pop = sum(black_jail_pop, na.rm=TRUE),
+            total_latinx_jail_pop = sum(latinx_jail_pop, na.rm=TRUE),
+            total_native_jail_pop = sum(native_jail_pop, na.rm=TRUE),
+            total_other_race_jail_pop = sum(other_race_jail_pop, na.rm=TRUE)
+  ) %>%
+  mutate(total_non_white_jail_pop = total_aapi_jail_pop + total_black_jail_pop +
+           total_latinx_jail_pop + total_native_jail_pop + total_other_race_jail_pop) %>%
+  select(year, white=total_white_jail_pop, non_white=total_non_white_jail_pop, aapi=total_aapi_jail_pop, black=total_black_jail_pop, 
+         latinx=total_latinx_jail_pop, native=total_native_jail_pop, 
+         other_race=total_other_race_jail_pop)
 #  gather(key = race, value = jail_pop, white, non_white, aapi, black, latinx, native, other_race) %>%
 #  select(year, race, jail_pop)
 View(white_and_poc)
@@ -91,7 +104,6 @@ p <- ggplot(data = us_states,
             mapping = aes(x = long, y = lat,
                           group = group, fill=region))
 p + geom_polygon(color = "gray90", size=0.1)
-
 
 
 
