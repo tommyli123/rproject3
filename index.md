@@ -4,7 +4,7 @@ Loren Ipsum
 
 # Appendix
 
-## Sample 1
+## Sample Foo
 
-## Sample 2
+## Sample Bar
 
