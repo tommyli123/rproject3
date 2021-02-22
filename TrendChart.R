@@ -121,8 +121,8 @@ ggplot(data = state_latinx_black, aes(x=year, y=total_jail, group=race_in_state)
   geom_line(aes(linetype="solid", color=race_in_state, size=1)) +
   geom_point() +
   theme(legend.position = "right") +
-  guides(color=guide_legend(override.aes = list(size=3))) +
-  scale_color_brewer(palette = "Paired")
+  guides(color=guide_legend(override.aes = list(size=3)))
+#  scale_color_brewer(palette = "Greens")
 
 # TODO : following is work in progress
 
