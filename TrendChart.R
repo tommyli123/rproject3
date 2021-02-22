@@ -2,6 +2,7 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 library(maps)
+library(stringr)
 
 incarceration_trends <- read.csv("c:\\Users\\tommy\\project\\incarceration-trends\\incarceration_trends.csv")
 
@@ -125,14 +126,61 @@ ggplot(data = state_latinx_black, aes(x=year, y=total_jail, group=race_in_state)
 
 # TODO : following is work in progress
 
-us_states <- map_data("state")
+
+# Step 8 : obtain state geo long/lat definition and state abbreviation, 
+#          and define centralized coordinate for each state
+us_states <- map_data("state") %>%
+  mutate(state = state.abb[match(str_to_title(us_states$region), state.name)])
 View(us_states)
 
+centroids <- data.frame(region=tolower(state.name), long=state.center$x, lat=state.center$y)
+centroids$state<-state.abb[match(centroids$region,tolower(state.name))]
+View(centroids)
 
-p <- ggplot(data = us_states,
-            mapping = aes(x = long, y = lat,
-                          group = group, fill=region))
-p + geom_polygon(color = "gray90", size=0.1)
+
+# step 9 : summarize black total jail by state since 1985
+black_by_states_summary <- incarceration_trends %>%
+  filter(year >= 1985) %>%
+  group_by(state) %>%
+  summarize(total_black_jail_pop = sum(black_jail_pop, na.rm=TRUE)
+  ) %>%
+  select(state, total_black_jail_pop)
+black_by_states_summary$black_jail_pop_range <- cut(black_by_states_summary$total_black_jail_pop, 12)
+View(black_by_states_summary)
+
+
+
+# Step 10 : merge black_by_states_summary, and us_states by state
+black_by_states_summary_merged <- merge(us_states, black_by_states_summary, by="state")
+
+ggplot(black_by_states_summary_merged, 
+       aes(x=long, y=lat, group=state, fill=black_jail_pop_range, color=black_jail_pop_range)) +
+  geom_polygon(color="grey", size=0.05) + coord_equal() +
+  with(centroids,
+       annotate(geom="text", x=long, y=lat, label=state, size=4, color="white")
+       ) +
+  scale_fill_brewer(palette = "Spectral")
+
+# step 11 : summarize latinx total jail by state since 1985
+latinx_by_states_summary <- incarceration_trends %>%
+  filter(year >= 1985) %>%
+  group_by(state) %>%
+  summarize(total_latinx_jail_pop = sum(latinx_jail_pop, na.rm=TRUE)
+  ) %>%
+  select(state, total_latinx_jail_pop)
+latinx_by_states_summary$latinx_jail_pop_range <- cut(latinx_by_states_summary$total_latinx_jail_pop, 12)
+View(latinx_by_states_summary)
+
+# Step 12 : merge latinx_by_states_summary, and us_states by state
+latinx_by_states_summary_merged <- merge(us_states, latinx_by_states_summary, by="state")
+
+ggplot(latinx_by_states_summary_merged, 
+       aes(x=long, y=lat, group=state, fill=latinx_jail_pop_range, color=latinx_jail_pop_range)) +
+  geom_polygon(color="grey", size=0.05) + coord_equal() +
+  with(centroids,
+       annotate(geom="text", x=long, y=lat, label=state, size=4, color="white")
+  ) +
+  scale_fill_brewer(palette = "Spectral")
 
 
 
