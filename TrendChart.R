@@ -124,6 +124,14 @@ ggplot(data = state_latinx_black, aes(x=year, y=total_jail, group=race_in_state)
   guides(color=guide_legend(override.aes = list(size=3)))
 #  scale_color_brewer(palette = "Greens")
 
+# STEP 7A: scatter plot to compare latinx::CA and black::CA
+CA_latinx_black <- state_latinx_black %>%
+  filter(race_in_state == "latinx::CA" | race_in_state == "black::CA")
+View(CA_latinx_black)
+ggplot(CA_latinx_black, aes(x=year, y=total_jail, shape=race_in_state, color=race_in_state )) +
+  geom_point()
+
+
 # TODO : following is work in progress
 
 
