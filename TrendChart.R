@@ -129,14 +129,15 @@ ggplot(data = state_latinx_black, aes(x=year, y=total_jail, group=race_in_state)
 
 # Step 8 : obtain state geo long/lat definition and state abbreviation, 
 #          and define centralized coordinate for each state
-us_states <- map_data("state") %>%
-  mutate(state = state.abb[match(str_to_title(us_states$region), state.name)])
+us_states <- map_data("state")
+us_states$state <- state.abb[match(str_to_title(us_states$region), state.name)]
 View(us_states)
 
 centroids <- data.frame(region=tolower(state.name), long=state.center$x, lat=state.center$y)
 centroids$state<-state.abb[match(centroids$region,tolower(state.name))]
 View(centroids)
 
+View(us_states)
 
 # step 9 : summarize black total jail by state since 1985
 black_by_states_summary <- incarceration_trends %>%
@@ -152,14 +153,16 @@ View(black_by_states_summary)
 
 # Step 10 : merge black_by_states_summary, and us_states by state
 black_by_states_summary_merged <- merge(us_states, black_by_states_summary, by="state")
+View(black_by_states_summary_merged)
 
-ggplot(black_by_states_summary_merged, 
+black_by_states_summary_merged_plot <- ggplot(black_by_states_summary_merged, 
        aes(x=long, y=lat, group=state, fill=black_jail_pop_range, color=black_jail_pop_range)) +
   geom_polygon(color="grey", size=0.05) + coord_equal() +
   with(centroids,
        annotate(geom="text", x=long, y=lat, label=state, size=4, color="white")
        ) +
   scale_fill_brewer(palette = "Spectral")
+plot(black_by_states_summary_merged_plot)
 
 # step 11 : summarize latinx total jail by state since 1985
 latinx_by_states_summary <- incarceration_trends %>%
